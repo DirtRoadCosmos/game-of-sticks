@@ -61,10 +61,6 @@ while playing:
         playing = False
 
 
-# DONE: repeat turns until we're done
-# DONE: end the game
-# DONE: validate user input
-
 
 
 
