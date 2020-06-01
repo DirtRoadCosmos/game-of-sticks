@@ -197,7 +197,8 @@ while playing or training_todo > 0:
         if training_todo > 1:
             training_todo -= 1
             if printing:
-                again = input("Press ENTER.")
+                print("Scroll up to see game history.")
+                input("Then press ENTER.")
                 print()
         elif training_todo == 1:
             training_todo = 0
