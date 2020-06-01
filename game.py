@@ -1,4 +1,5 @@
 from random import randint
+import time
 
 starting_sticks = 21
 playing = True
@@ -7,6 +8,8 @@ training_todo = 0
 wins = [0, 0]
 hats = [[], []]
 waiting = [[], []]
+hide = False
+seen_ai_training = False
 
 # display intro info
 print()
@@ -18,6 +21,7 @@ print("Your goal is to force the other ")
 print("player to pick up the last stick.")
 
 player_type = ["", ""]
+player_name = ["", ""]
 
 print()
 playmode = -1
@@ -31,12 +35,32 @@ while not(playmode in [0, 1, 2]):
 if playmode == 0:
     player_type[0] = "h"
     player_type[1] = "a"
+    player_name[0] = "Human"
+    player_name[1] = "AI"
+    print()
+    print()
+    print()
+    print()
+    print("*****************************")
+    print(" AI will now play >500 games")
+    print(" against itself")
+    print(" to figure out a strategy")
+    print(" ... press enter ...")
+    print("*****************************")
+    input()
+    time.sleep(1)
+
 elif playmode == 1:
     player_type[0] = "h"
     player_type[1] = "r"
+    player_name[0] = "Human"
+    player_name[1] = "Random"
 elif playmode == 2:
     player_type[0] = "h"
     player_type[1] = "h"
+    print()
+    player_name[0] = input("What is Player 1's name? ")
+    player_name[1] = input("What is Player 2's name? ")
 
 orig_type=[]
 if "a" in player_type:
@@ -46,6 +70,7 @@ if "a" in player_type:
     player_type[1] = "a"
     training_todo = training_total
     playing = False
+    hide = True
 
 def full_hat(i):
     if i == 0:
@@ -65,7 +90,7 @@ while playing or training_todo > 0:
     sticks = starting_sticks
     player = 1
     printing = False
-    if (playing or
+    if not hide and (playing or
         training_todo > training_total - 5 or
         (training_todo > training_total - 100 and training_todo % 10 == 0) or
         training_todo % 100 == 0):
@@ -76,7 +101,10 @@ while playing or training_todo > 0:
         if printing:
             print()
             print(f"There are {sticks} sticks on the table.")
-            print(f"It's Player {player}'s turn.")
+            if player_type[player-1] == "h":
+                print(f"It's Player {player}: {player_name[player-1]}'s turn.")
+            else:
+                print(f"It's Player {player}'s turn.")
 
         max = min(sticks, 3)
         if player_type[player-1] == "r":
@@ -103,8 +131,11 @@ while playing or training_todo > 0:
 
     if printing:
         print()
-        print(" --> That's the end!")
-        print(f"The winner is Player {player}!")
+        print(" --> That's the end <--")
+        if training_todo > 0:
+            print(f"The winner is Player {player}: AI!")
+        else:
+            print(f"The winner is Player {player}: {player_name[player-1]}!")
 
     # update winning AI
     if player_type[player-1] == "a":
@@ -136,11 +167,31 @@ while playing or training_todo > 0:
         print(f"Current Score: {wins[0]}-{wins[1]}")
 
     if playing:
-        print()
-        again = input("Press ENTER to play again, q-ENTER to exit. ")
-        print()
-        if again == "q":
-            playing = False
+        if playmode == 0 and not seen_ai_training:
+            print()
+            watch = input("Press ENTER to play again,\nor 'w' to erase the AI's memory and watch it train. ")
+            print()
+            if watch == "w":
+                wins = [0, 0]
+                player_type[0] = "a"
+                player_type[1] = "a"
+                training_todo = training_total
+                playing = False
+                hide = False
+                hats = [[], []]
+                waiting = [[], []]
+                seen_ai_training = True
+                for i in range(starting_sticks):
+                    hats[0].append(full_hat(i))
+                    hats[1].append(full_hat(i))
+                    waiting[0].append(0)
+                    waiting[1].append(0)
+        else:
+            print()
+            again = input("Press ENTER to play again,\nor 'e' to exit. ")
+            print()
+            if again == "e":
+                playing = False
     else:
         # training update
         if training_todo > 1:
@@ -151,15 +202,19 @@ while playing or training_todo > 0:
         elif training_todo == 1:
             training_todo = 0
             playing = True
+            hide = False
             player_type[0]=orig_type[0]
             player_type[1]=orig_type[1]
             wins = [0, 0]
 
             print()
             print("*****************************")
-            print("  AI Training Complete")
+            print("  just played more >500 games")
+            print("  AI training complete")
+            print("  Ready to play a human")
+            print("  ... press enter ...")
             print("*****************************")
             print()
-
+            input()
 
 
