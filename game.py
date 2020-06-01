@@ -2,7 +2,7 @@ from random import randint
 
 starting_sticks = 21
 playing = True
-training_total = 500
+training_total = 599
 training_todo = 0
 wins = [0, 0]
 hats = [[], []]
@@ -20,13 +20,23 @@ print("player to pick up the last stick.")
 player_type = ["", ""]
 
 print()
-player_type[0] == ""
-while not(player_type[0] in ["r", "a", "h"]):
-    player_type[0] = input("Will Player 1 be (r)andom, (a)i or (h)uman? ").lower()
+playmode = -1
+while not(playmode in [0, 1, 2]):
+    print("How would you like to play?")
+    print(" (0) Human vs AI")
+    print(" (1) Human vs Random")
+    print(" (2) Human vs Human")
+    playmode = int(input("Select 0, 1, or 2: "))
 
-player_type[1] == ""
-while not(player_type[1] in ["r", "a", "h"]):
-    player_type[1] = input("Will Player 2 be (r)andom, (a)i or (h)uman? ").lower()
+if playmode == 0:
+    player_type[0] = "h"
+    player_type[1] = "a"
+elif playmode == 1:
+    player_type[0] = "h"
+    player_type[1] = "r"
+elif playmode == 2:
+    player_type[0] = "h"
+    player_type[1] = "h"
 
 orig_type=[]
 if "a" in player_type:
@@ -54,26 +64,34 @@ for i in range(starting_sticks):
 while playing or training_todo > 0:
     sticks = starting_sticks
     player = 1
+    printing = False
+    if (playing or
+        training_todo > training_total - 5 or
+        (training_todo > training_total - 100 and training_todo % 10 == 0) or
+        training_todo % 100 == 0):
+        printing = True
+
     while sticks > 0:
         # print start of turn
-        print()
-        print(f"Player {player}: It's your turn.")
-        print(f"There are {sticks} sticks on the table.")
+        if printing:
+            print()
+            print(f"There are {sticks} sticks on the table.")
+            print(f"It's Player {player}'s turn.")
 
+        max = min(sticks, 3)
         if player_type[player-1] == "r":
-            pickup = randint(1, 3)
-            print(f"Random picks up {pickup} sticks.")
+            pickup = randint(1, max)
+            if printing: print(f"Random picks up {pickup} sticks.")
         elif player_type[player-1] == "a":
             options = hats[player-1][sticks-1]
-            print(f"AI options are {options}")
+            if printing and not playing: print(f"AI options are {options}")
             pickup = options.pop(randint(0, len(options)-1))
             waiting[player-1][sticks-1] = pickup
-            print(f"AI picks up {pickup} sticks.")
+            if printing: print(f"AI picks up {pickup} sticks.")
         elif player_type[player-1] == "h":
-            # get player input
-            pickup = input("How many sticks do you take? ")
-            while not pickup.isdigit() or int(pickup) < 1 or int(pickup) > 3:
-                pickup = input("How many sticks do you take? ")
+            pickup = input(f"How many sticks do you take? (1-{max}) ")
+            while not pickup.isdigit() or int(pickup) < 1 or int(pickup) > max:
+                pickup = input(f"How many sticks do you take? (1-{max}) ")
             pickup = int(pickup)
 
         # update state variables
@@ -83,11 +101,10 @@ while playing or training_todo > 0:
         elif player == 2:
             player = 1
 
-    print()
-    print(" --> That's the end!")
-    print(f"The winner is Player {player}!")
-    wins[player-1] += 1
-    print(f"That makes it {wins[0]}-{wins[1]}")
+    if printing:
+        print()
+        print(" --> That's the end!")
+        print(f"The winner is Player {player}!")
 
     # update winning AI
     if player_type[player-1] == "a":
@@ -106,10 +123,17 @@ while playing or training_todo > 0:
                 if len(hat) == 0:
                     hat.extend(full_hat(idx))
             # print hats
-            print()
-            print(f"Updated hats for Player {i+1}:")
-            for idx, hat in enumerate(reversed(hats[i])):
-                print(f"Hat {21-idx}: {hat}")
+            if printing and not playing:
+                print()
+                print(f"Updated hats for Player {i+1}:")
+                for idx, hat in enumerate(reversed(hats[i])):
+                    print(f"Hat {21-idx if idx < 12 else '0'+str(21-idx)}: {hat}")
+
+    wins[player-1] += 1
+    if printing:
+        print()
+        print(f"Games Played:  {wins[0]+wins[1]}")
+        print(f"Current Score: {wins[0]}-{wins[1]}")
 
     if playing:
         print()
@@ -121,6 +145,9 @@ while playing or training_todo > 0:
         # training update
         if training_todo > 1:
             training_todo -= 1
+            if printing:
+                again = input("Press ENTER.")
+                print()
         elif training_todo == 1:
             training_todo = 0
             playing = True
@@ -128,6 +155,11 @@ while playing or training_todo > 0:
             player_type[1]=orig_type[1]
             wins = [0, 0]
 
+            print()
+            print("*****************************")
+            print("  AI Training Complete")
+            print("*****************************")
+            print()
 
 
 
