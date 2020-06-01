@@ -1,5 +1,13 @@
 from random import randint
 
+starting_sticks = 21
+playing = True
+training_total = 500
+training_todo = 0
+wins = [0, 0]
+hats = [[], []]
+waiting = [[], []]
+
 # display intro info
 print()
 print("**********************************")
@@ -20,16 +28,14 @@ player_type[1] == ""
 while not(player_type[1] in ["r", "a", "h"]):
     player_type[1] = input("Will Player 2 be (r)andom, (a)i or (h)uman? ").lower()
 
-starting_sticks = 21
-playing = True
-wins = [0, 0]
-hats = []
-hats.append([])
-hats.append([])
-hats[1] = []
-waiting = []
-waiting.append([])
-waiting.append([])
+orig_type=[]
+if "a" in player_type:
+    orig_type.append(player_type[0])
+    orig_type.append(player_type[1])
+    player_type[0] = "a"
+    player_type[1] = "a"
+    training_todo = training_total
+    playing = False
 
 def full_hat(i):
     if i == 0:
@@ -45,7 +51,7 @@ for i in range(starting_sticks):
     waiting[0].append(0)
     waiting[1].append(0)
 
-while playing:
+while playing or training_todo > 0:
     sticks = starting_sticks
     player = 1
     while sticks > 0:
@@ -95,7 +101,6 @@ while playing:
             # clear waiting
             for j in range(starting_sticks):
                 waiting[i][j] = 0
-            print(waiting[i])
             # fill empty hats
             for idx, hat in enumerate(hats[i]):
                 if len(hat) == 0:
@@ -106,12 +111,22 @@ while playing:
             for idx, hat in enumerate(reversed(hats[i])):
                 print(f"Hat {21-idx}: {hat}")
 
-    print()
-    again = input("Press ENTER to play again, q-ENTER to exit. ")
-    print()
-    if again == "q":
-        playing = False
-
+    if playing:
+        print()
+        again = input("Press ENTER to play again, q-ENTER to exit. ")
+        print()
+        if again == "q":
+            playing = False
+    else:
+        # training update
+        if training_todo > 1:
+            training_todo -= 1
+        elif training_todo == 1:
+            training_todo = 0
+            playing = True
+            player_type[0]=orig_type[0]
+            player_type[1]=orig_type[1]
+            wins = [0, 0]
 
 
 
