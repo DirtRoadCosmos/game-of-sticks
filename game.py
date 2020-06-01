@@ -48,7 +48,10 @@ if playmode == 0:
     print(" ... press enter ...")
     print("*****************************")
     input()
-    time.sleep(1)
+    print("playing ")
+    for i in range(10):
+        time.sleep(.2)
+        print("."*(i+1))
 
 elif playmode == 1:
     player_type[0] = "h"
