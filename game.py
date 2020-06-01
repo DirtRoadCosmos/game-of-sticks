@@ -31,14 +31,19 @@ waiting = []
 waiting.append([])
 waiting.append([])
 
-def full_hat():
-    return [1, 2, 3]
+def full_hat(i):
+    if i == 0:
+        return [1]
+    elif i == 1:
+        return [1, 2]
+    else:
+        return [1, 2, 3]
 
 for i in range(starting_sticks):
-    hats[0].append(full_hat())
-    hats[1].append(full_hat())
-    waiting[0].append(None)
-    waiting[1].append(None)
+    hats[0].append(full_hat(i))
+    hats[1].append(full_hat(i))
+    waiting[0].append(0)
+    waiting[1].append(0)
 
 while playing:
     sticks = starting_sticks
@@ -54,6 +59,7 @@ while playing:
             print(f"Random picks up {pickup} sticks.")
         elif player_type[player-1] == "a":
             options = hats[player-1][sticks-1]
+            print(f"AI options are {options}")
             pickup = options.pop(randint(0, len(options)-1))
             waiting[player-1][sticks-1] = pickup
             print(f"AI picks up {pickup} sticks.")
@@ -80,23 +86,25 @@ while playing:
     # update winning AI
     if player_type[player-1] == "a":
         for idx, item in enumerate(waiting[player-1]):
-            if item:
+            if item != 0:
                 hats[player-1][idx].extend([item, item])
 
     # for both players
     for i in range(2):
         if player_type[i] == "a":
             # clear waiting
-            for j in waiting[i]:
-                j = None
+            for j in range(starting_sticks):
+                waiting[i][j] = 0
+            print(waiting[i])
             # fill empty hats
-            for hat in hats[i]:
+            for idx, hat in enumerate(hats[i]):
                 if len(hat) == 0:
-                    hat.extend(full_hat())
+                    hat.extend(full_hat(idx))
             # print hats
             print()
             print(f"Updated hats for Player {i+1}:")
-            print(hats[i])
+            for idx, hat in enumerate(reversed(hats[i])):
+                print(f"Hat {21-idx}: {hat}")
 
     print()
     again = input("Press ENTER to play again, q-ENTER to exit. ")
